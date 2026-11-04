@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>學生自我評測系統</title>
+<style>
+  html, body { background-color: #fbfbfa; margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #37352f; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; padding: 16px 12px; }
+  .quiz-title { font-size: 22px; font-weight: 700; margin: 15px 0; text-align: center; width: 100%; }
+  .quiz-container { width: 100%; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+  .card { background: #ffffff; border: 1px solid #e9e9e6; border-radius: 12px; padding: 20px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); box-sizing: border-box; width: 100%; position: relative; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; background: #e3e2e0; color: #5f5e5b; }
+  .badge.multi { background: #eae6ff; color: #4022b8; }
+  .question { font-size: 16px; font-weight: 600; line-height: 1.5; margin-bottom: 16px; word-break: break-all; }
+  .options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .option-btn { width: 100%; text-align: left; background: #ffffff; border: 1px solid #e9e9e6; padding: 14px 12px; border-radius: 8px; cursor: pointer; font-size: 15px; transition: all 0.15s; color: #37352f; outline: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; line-height: 1.4; }
+  .option-btn.selected { border-color: #2f54eb; background: #f0f5ff; color: #1d39c4; font-weight: 500; }
+  .option-btn.correct { background-color: #e2f6ea !important; border-color: #52c41a !important; color: #135200; font-weight: bold; }
+  .option-btn.wrong { background-color: #ffeef0 !important; border-color: #ff4d4f !important; color: #a8071a; }
+  .submit-btn { width: 100%; background: #2383e2; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: background 0.15s; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  .explanation { display: none; margin-top: 16px; padding: 14px; background: #f7f6f3; border-left: 4px solid #2383e2; border-radius: 4px; font-size: 14px; line-height: 1.6; word-break: break-all; }
+  .close-btn { width: 100%; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); -webkit-tap-highlight-color: transparent; background: #8c8c8c; color: white; margin-bottom: 10px; }
+  .copyright { font-size: 12px; color: #8c8c8c; text-align: center; margin: 25px 0 10px 0; width: 100%; font-weight: 400; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+<div class="quiz-title">📝第 12 章 學生自我評測</div>
+<div class="quiz-container">
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q1. 甲公司於X9年底發行5年期之可買回、可轉換公司債，該可買回、可轉換公司債整體公允價值為$927,000，公司債面額為$900,000，票面利率3%，每年年底付息，轉換價格為$50。已知發行當日各組成部分單獨之公允價值如下：(1)有買回權無認股權之公司債$870,000；(2)只有買回權$(45,000)；(3)只有認股權$75,000<br>則有關甲公司X9年底發行可買回、可轉換公司債之分錄，下列敘述何者正確？  [108高考會審]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 借記透過損益按公允價值衡量之金融資產─買回權$45,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 貸記透過損益按公允價值衡量之金融負債─買回權$45,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 借記應付公司債折價$75,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 貸記資本公積－認股權$75,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>資本公積─認股權=$927,000-$870,000=$57,000<br>無買回權無認股權之公司債=公允價值$870,000+$45,000=$915,000<br>應付公司債溢價=$915,000-$900,000=$15,000<br>X9/12/31<br>現金　　927,000<br>透過損益按公允價值衡量之金融資產─買回權　　45,000<br>　　應付公司債　　900,000<br>　　應付公司債溢價　　15,000<br>　　資本公積─認股權　　57,000<br></div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q2. 甲公司於X8年1月1日發行三年期之可轉換公司債，共得款$1,040,000，該公司債面額為$1,000,000，票面利率2%，每年12月31日付息。每張面額$1,000之公司債可以換成面額$10之普通股20股，已知發行當時市場上相同條件之不附轉換權公司債之公允價值為$801,047，公司債有效利率為10%。若X9年1月1日甲公司在公開市場依市價$1,100,000買回所有公司債，此時不含轉換權公司債之公允價值為$900,000，則有關甲公司買回公司債之分錄，何者正確？  [108地特中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 借記資本公積─認股權$200,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 貸記資本公積─庫藏股票交易$238,953</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. 借記收回公司債損失$38,848</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 貸記收回公司債利得$105</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X8/1/1<br>現金　　1,040,000<br>應付公司債折價　　198,953<br>　　應付公司債　　1,000,000<br>　　資本公積─認股權　　238,953<br>X8/12/31<br>利息費用　　80,105<br>　　現金　　20,000<br>　　應付公司債折價　　60,105<br>X9/1/1<br>應付公司債　　1,000,000<br>資本公積─認股權　　238,953<br>公司債贖回損失　　38,848 ($861,152-$900,000) <br>　　現金　　1,100,000<br>　　應付公司債折價　　138,848<br>　　資本公積-庫藏股票交易　　38,953 ($238,953-$200,000) <br>公司債面額=$861,152，公司債公允價值=$900,000<br>認股權面額=$238,953，認股權公允價值=$200,000</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q3. 甲公司X1年12月31日可轉換公司債相關科目之餘額為：應付公司債$800,000，應付公司債折價(未攤銷餘額)$96,000，資本公積－認股權$40,000；當日保留盈餘之餘額為$1,000,000。甲公司於X1年9月1日及X1年10月20日分別以每股$35及$45購入庫藏股票30,000股及20,000股，備供公司債持有人轉換之用。X2年1月1日公司債持有人持面額$200,000之公司債要求轉換，當時轉換價格為每股$20，普通股市價為每股$50。IFRS並未明確規範下，若甲公司依我國公司慣用之加權平均法處理庫藏股票之交易，則下列有關甲公司之公司債轉換分錄，何者正確？  [110鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 借記：保留盈餘$204,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 借記：應付公司債$800,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 貸記：資本公積─認股權$10,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 貸記：庫藏股票$500,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X2/1/1<br>應付公司債　　200,000<br>資本公積─認股權　　10,000<br>保留盈餘　　204,000<br>　　應付公司債折價　　24,000<br>　　庫藏股票　　390,000<br>加權平均庫藏股票成本=($35x30,000+$45x20,000)/50,000=$39<br>共計發出庫藏股=200,000/20=10,000股</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q4. 甲公司於X2年1月1日發行面額為$1,000,000之可轉換公司債，公司債流通期間持有人可按$50的轉換價格轉換為甲公司面額$10之普通股1股。發行後該可轉換公司債相關之「資本公積—認股權」金額為$60,000。X3年12月31日甲公司為誘導轉換，宣布將轉換價格降為$40，當日普通股每股市價為$60，公司債帳面金額為$980,000，若該日公司債持有人全部轉換為普通股，則轉換之分錄應包括：  [111鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 貸記「資本公積—普通股溢價」$1,090,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 貸記「資本公積—認股權」$60,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 貸記「普通股股本」$200,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 借記「公司債轉換費用」$50,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>資本公積—認股權　　60,000<br>公司債轉換費用　　300,000(25,000-20,000)x60<br>應付公司債　　980,000<br>　　普通股股本　　250,000($1,000,000/40)<br>　　資本公積—普通股溢價　　1,090,000</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q5. 甲公司於X2年1月1日發行面額$1,000,000，票面利率3%，5年期之可買回可轉換公司債，每年12月31日付息，轉換價格為$50，該可買回可轉換公司債整體公允價值為$1,020,000，發行當日各組成部分單獨之公允價值如下：(1)有買回權無認股權之公司債$850,000；(2)只有買回權$(50,000)；(3)只有認股權$200,000<br>則下列有關甲公司X2年1月1日發行可買回可轉換公司債之分錄何者正確？  [111鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 借記應付公司債折價$150,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 貸記資本公積—認股權$200,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 貸記透過損益按公允價值衡量之金融負債—買回權$50,000</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 借記透過損益按公允價值衡量之金融資產—買回權$50,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q6. 甲公司於X1年1月1日，平價發行面額$1,000的3年期可轉換債券2,000張，名目利率6%，年底付息，每張債券可於到期日前，轉換為25股面額$10的普通股，發行當日，不附轉換權的債券其市場利率為9%。若甲公司於X2年1月1日以$1,180,000買回一半流通在外的可轉換公司債，其中$1,100,000屬於負債組成部分的對價，則X2年1月1日買回可轉換公司債之交易，對甲公司權益總額有何影響？  [112高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 減少$75,939</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 減少$80,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 減少$156,834</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 減少$232,773</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X1/1/1負債帳面金額=$2,000,000xp(3,9%)+$2,000,000x6%xP(3,9%)=$1,848,122<br>X1/1/1資本公積─認股權=$2,000,000-$1,848,122=$151,878<br>X2/1/1負債帳面金額=$2,000,000xp(2,9%)+$2,000,000x6%xP(2,9%)=$1,894,453<br>X2/1/1<br>應付公司債　　1,000,000<br>公司債贖回損失　　152,773 ($1,100,000-$1,894,453/2)<br>　　應付公司債折價　　52,773 [($2,000,000-$1,894,453)/2] <br>　　現金　　1,100,000<br>資本公積─認股權　　75,939 ($151,878/2)<br>保留盈餘　　4,061 ($80,000-$75,939)<br>　　現金　　80,000<br>權益總額減少=$152,773+$75,939+$4,061=$232,773</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q7. 甲公司於X1年1月1日發行3年期之可轉換公司債，扣除證券商承銷費用$10,000後，共得款$1,040,000，該公司債面額為$1,000,000，票面利率2%，每年12月31日付息。每張面額$1,000之公司債可以換成面額$10之普通股20股，已知不附轉換權公司債的入帳金額為$801,047。則發行當時市場上相同條件之不附轉換權公司債之公允價值為何？  [112鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $811,047</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $808,749</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $806,049</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $801,047</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>公允價值=$801,047+公允價值x$10,000/($1,040,000+$10,000)<br>公允價值=$808,749</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q8. 甲公司於X1年發行面額$10,000,000之可轉換公司債，當時曾貸記資本公積-轉換權$200,000。X4年底付息後，投資人全數申請轉換為普通股100,000股，當日普通股每股公允價值為$102，公司債之帳面價值為$9,500,000，公司債及轉換權之公允價值分別為$9,800,000及$500,000。甲公司於公司債轉換普通股時，應認列轉換損益若干？  [112會計師]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. $0</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 轉換損失$100,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 轉換損失$300,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 轉換損失$500,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q9. 甲公司於X6年1月1日以$1,000,000之價格發行票面利率4%，4年期，面額$1,000,000之可買回可轉換公司債，每年12月31日付息一次，轉換價格為$25。發行日經評估未含買回權及轉換權之單純公司債的公允價值為$980,538，買回權的公允價值為$22,000，甲公司自X8年1月1日起可按面額110加計應計利息買回該公司債。若甲公司支付發行成本為$17,036，有關X6年甲公司發行可買回可轉換公司債之分錄，下列敘述何者正確？  [115高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 借記「應付公司債折價」$36,498</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 借記「持有供交易之金融資產─買回權」$21,641</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 貸記「資本公積─認股權」$19,138</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 貸記「資本公積─認股權」$40,785</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>負債成分公允價值=980,538-22,000=958,538<br>權益成分公允價值=1,000,000-958,538=41,462<br>總公允價值=980,538+22,000+41,462=1,044,000<br>負債應分攤之發行成本=17,036x980,538/1,044,000=16,000<br>買回權應分攤之發行成本=17,036x22,000/1,044,000=359<br>權益應分攤之發行成本=17,036x41,462/1,044,000=677<br>資本公積─認股權=41,462-677=40,785<br>應付公司債=980,538-16,000=964,538<br>應付公司債折價=1,000,000-964,538=35,462<br>現金　　982,964(1,000,000-17,036)<br>持有供交易之金融資產─買回權　　22,000<br>手續費　　359<br>應付公司債折價　　35,462<br>　　應付公司債　　1,000,000<br>　　資本公積─認股權　　40,785</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q10. 甲公司於X1年初發行票面利率5%之3年期公司債，公司債每年底付息一次，為增加投資人購買誘因，每張面額10萬元之公司債另搭配可分離認股權10單位，發行當日投資人以11萬元購入每張公司債及搭配之可分離10單位認股權，市場利率為7%。下列敘述何者正確？  [112會計師]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 該公司債屬於複合金融工具</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 甲公司於發行日應貸記負債11萬元</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 甲公司於發行日應貸記權益科目1萬元</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 該公司債係折價發行</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>負債帳面金額=$100,000x5%xP(3,7%)+$100,000xp(3,7%)=$94,751<br>現金　　110,000<br>應付公司債折價　　5,249 ($100,000-$94,751)<br>　　資本公積─認股權　　15,249 ($110,000-$94,751)<br>　　應付公司債　　100,000</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q11. 戊公司於X2年1月1日以平價發行面額$1,000,000之五年期不附息、可賣回之轉換公司債，並支付證券商承銷費用千分之三。對於該債券之賣回權，債券持有人可於X5年12月31日要求戊公司按債券面額加計4.5%贖回公司債。對於該債券之轉換權，債券持有人可自債券發行日起滿6個月至到期日前15日為止，隨時請求將債券以每股$50之轉換價格轉換為戊公司之普通股。戊公司於發行時依據評價方法對於下列兩項金融工具之公允價值進行估計：其一為附賣回權之不可轉換的相同條件公司債之公允價值為$923,453，另一為嵌入式賣回選擇權之公允價值為$21,647。戊公司於發行不附息、可賣回之轉換公司債時，經判斷經濟特性及風險與主契約(公司債)之關聯，將發行之金融工具分別歸類為按攤銷後成本衡量之金融負債(公司債)，透過損益按公允價值衡量之金融負債(賣回權)，及權益(轉換權)。請問：戊公司於發行日獲得之淨現金流入，應如何依序分別入帳於主契約(公司債)之金融負債、賣回選擇權之金融負債及轉換權之資本公積？  [108鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $898,806；$21,647；$76,547</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $899,101；$21,647；$76,317</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $901,806；$21,647；$76,547</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $901,806；$21,647；$79,547</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>轉換權之資本公積公允價值=$1,000,000-$923,453=$76,547<br>主合約之負債組成部分(無賣回權之不可轉換之公司債)公允價值=$923,453-$21,647=$901,806<br>支付證券商承銷費用千分之三=$1,000,000x3%=$3,000<br>主合約之負債組成部分=$901,806-$901,806x$3,000/$1,000,000=$899,101<br>嵌入式衍生性金融工具：嵌入式賣回選擇權=$21,647<br>轉換權之資本公積=$76,547-$76,547x$3,000/$1,000,000=$76,317</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q12. 甲公司於X7年1月1日以104之價格發行面額$1,000,000，票面利率2%之3年期可轉換公司債，每年12月31日付息，有效利率10%，該公司債可轉換成面額$10之普通股20,000股。發行當時不含轉換權之公司債公允價值為$801,050，轉換權之公允價值為$250,000。若X8年1月1日甲公司在公開市場依市價$1,100,000提前買回公司債，此時不含轉換權之公司債公允價值為$900,000，則甲公司應認列損益為何？  [108薦任升等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 損失$200,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 損失$98,950</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. 損失$38,845</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 利得$105</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X8/1/1不含轉換權之公司債帳面金額=$801,050x1.1-$1,000,000x2%=$861,155<br>損失=$861,155-$900,000=-$38,845</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q13. 花蓮公司於X2年1月1日按面額發行500張可賣回可轉換公司債，並支付1.2%之發行成本。可賣回可轉換公司債為三年期，每張面額$1,000，票面附息4%，每半年付息一次(付息日為6月30日及12月31日)。自發行日後一年起至到期日前二十日止，投資人可按每股$40的價格將公司債轉換成花蓮公司的普通股。投資人亦可於X3年12月31日要求花蓮公司按109加應計利息買回公司債，逾期賣回權即失效。公司債發行當日，採用選擇權定價模式評估，賣回權的公允價值為$18,500，且經分析花蓮公司發行的公司債若不附賣回權及認股權，其有效利率為6%。假設X2年12月31日賣回權之公允價值為$21,200，試問花蓮公司X2年12月31日資產負債表上，應報導與該可賣回可轉換公司債有關的資本公積－認股權金額為何？  [109地特中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. $8,483</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $8,528</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $8,586</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $8,253</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>負債組成部分=$1,000x500x2%xP(6,3%)+$1,000x500xp(6,3%)+18,500<br>=$472,914+$18,500=$491,414<br>權益組成部分=$1,000x500-$491,414=$8,586<br>權益組成部分之交易成本=$1,000x500x1.2%x($8,586/$500,000)=$103<br>資本公積─認股權=$8,586-$103=$8,483，原始認列後不評價</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q14. 丁公司X1年5月1日以每股$25發行可轉換特別股5,000股，每股面額$20，轉換條件係以1股特別股轉換為2股普通股，每股面額$10。X2年3月5日，特別股股東行使轉換權，持有之特別股3,000股轉換為普通股，轉換當日，普通股股價為每股$15。請問：丁公司於X2年3月5日之轉換日應有之適當會計處理為何？  [110高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 借記：特別股股本$100,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 借記：資本公積─特別股股票溢價$25,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 貸記：普通股股本$90,000</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 貸記：資本公積─普通股股票溢價$15,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X2/3/5<br>特別股股本　　60,000 ($20x3,000)<br>資本公積─特別股股票溢價　　15,000 [($25-$20)x3,000]<br>　　普通股股本　　60,000 ($10x3,000x2)<br>　　資本公積─普通股股票溢價　　15,000</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q15. 甲公司於X1年1月1日，以平價發行面額總計$2,000,000的4年期可轉換公司債，票面利率4.0%，每年付息一次；該債券可於到期日前任何時點，按每$1,000面額轉換為100股面額$10之普通股。若發行日不附轉換權但條件相同的公司債市場利率為8.0%，且該可轉換債券於發行日之負債組成部分公允價值約為$1,735,000。若甲公司於X2年1月1日以現金$2,050,000買回全部流通在外的可轉換公司債，且買回時，負債組成部分的帳面金額已攤銷至$1,793,800，當時公允價值為$1,700,000，則X2年1月1日這筆可轉換公司債買回交易，對甲公司權益總額的淨影響為何？  [114高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 減少$178,800</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. 減少$256,200</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 減少$350,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 減少$443,800</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>2,050,000-1,793,800=256,200</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q16. 甲公司X5年初有面額$10，股利率3%之非累積可轉換特別股10,000股流通在外，每股可轉換為面額$10之普通股1股。X5年12月1日甲公司為促使該可轉換特別股之轉換，將轉換條件修改為若於X6年3月底前轉換，則每股特別股可轉換為面額$10之普通股1.5股及獲得現金$5，當日普通股股價為$40。X6年3月30日該10,000股可轉換特別股全數進行轉換，當日普通股股價為$50。試問：該可轉換特別股對甲公司X5年及X6年稅前淨利之影響分別為何？  [111地特中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. X5年及X6年均無影響</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. X5年無影響，X6年減少$300,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. X5年減少$250,000，X6年無影響</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. X5年減少$250,000，X6年減少$50,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q17. X1年7月1日甲公司可轉換公司債持有人行使$200,000可轉換公司債的轉換權(轉換價格為$50)，轉換日公司的股價為$56，股票面額$10，應付公司債折價為$6,400，資本公積─認股權為$10,000。則轉換時之分錄應包括：  [113地特三等]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 貸：資本公積─普通股股票溢價$163,600</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 貸：資本公積─普通股股票溢價$160,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 借：資本公積─認股權$30,400</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 借：公司債轉換損失$30,400</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>應付公司債　　$200,000<br>債券折價　　$6,400<br>資本公積─認股權　　$10,000<br>　　普通股(4,000股x$10)　　$40,000<br>資本公積─普通股股票溢價　　$163,600</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q18. 下列有關公司發行可轉換公司債與員工認股權之敘述，正確的說明有幾項？發行時都有資本公積之認列；發行時都有費用科目之認列；被轉換或被認股時，公司都會收到現金；被轉換或被認股時，公司都不會有費用科目之認列；都是由持有人決定是否轉換或認股  [114退除役特考]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 1項</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. 2項</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 3項</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 4項</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q19. 有關甲公司X1年每股盈餘及／或每股淨值之敘述，下列何者錯誤？  [111會計師]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 每股盈餘及每股淨值均應由甲公司計算，並列示於財務報表中</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 甲公司為誘導特別股於X1年間進行轉換，額外多給特別股股東現金$5,000，對X1年每股盈餘的分子之影響為減少$5,000</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 若甲公司除於X1年4月1日將1個股份分割為2個股份外，沒有其他有關於權益之交易，則於計算X1年每股盈餘及每股淨值時，應使用相同的分母</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 甲公司於X1年12月31日以每股$16，買回以平價發行之每股面額$10的特別股5,000股，並支付特別股X1年的股息8%，則每股盈餘的分子應減少$34,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q20. 甲公司X9年1月1日流通在外普通股股數為100,000股，X9年初有認股權20,000單位流通在外，每單位得按$30認購普通股1股，4月1日已認購12,000股，其餘8,000單位至X9年底仍未執行。此外，X9年初公司有可轉換公司債面額$1,000,000，票面利率5%，其中負債組成部分之原始有效利率亦為5%，每$100,000面額可轉換成普通股4,000股。X9年10月1日有$400,000可轉換公司債轉換成普通股16,000股，其餘債券至年底仍流通在外。甲公司普通股X9年1月1日至3月31日平均股價為$40，全年平均股價為$50，X9年稅後淨利為$339,000，所得稅率為20%，則在計算稀釋每股盈餘時，分母應為：  [108高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 145,000股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. 152,950股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 154,450股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 156,050股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>普通股加權流通在外股數=100,000+12,000x9/12+16,000x3/12=113,000<br>認股權分母= [12,000-(12,000x30/40)]x3/12+[8,000-(8,000x30/50)]x12/12=3,950<br>可轉換公司債分母=$400,000/$100,000x4,000x9/12+$600,000/$100,000x4,000=36,000<br>稀釋每股盈餘分母=113,000+3,950+36,000=152,950</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q21. 乙公司X2年初有200,000股普通股與5%之不可轉換累積特別股80,000股發行流通在外，普通股及特別股之面值均為每股$10。X2年1月1日，乙公司給予員工股票選擇權60,000股，員工於服務滿三年後，每單位可按每股$22認購普通股一股，給與日每單位員工股票選擇權之公允價值為$15。X3年7月1日，乙公司另發行認股證，股東可按每股$30認購普通股30,000股，至X3年底尚未執行。乙公司X3年淨利為$920,000，普通股全年平均市價為每股$36，7月1日至12月31日之平均市價為每股$45。乙公司X3年稀釋每股盈餘為：  [108鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $3.91</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $4.00</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $4.09</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $4.18</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=($920,000-$10x80,000x5%)/200,000=$880,000/200,000=$4.40<br>員工選擇權執行價格=$22+$15x1/3=$27<br>員工選擇權分母增加數=60,000x($36-$27)/$36]=15,000<br>認股證分母增加數=30,000x($45-$30/$45)x6/12=5,000<br>稀釋每股盈餘=$880,000/(200,000+15,000+5,000)=$4.00</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q22. 甲公司於X1年1月2日發行面額$4,000,000，7%的可轉換公司債，其中負債組成部分為$4,000,000(即公司債有效利率為7%)。每$1,000公司債可轉換20股普通股。公司於X1年未有任何公司債轉換，X1年有流通在外普通股400,000股，X1年的淨利為$1,200,000，所得稅稅率為30%，試問甲公司X1年的稀釋每股盈餘為何？(請計算至小數點第2位)  [108會計師]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $3.08</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $3.00</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $2.91</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.87</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=$1,200,000/400,000=$3<br>7%可轉換公司債之每增額股份盈餘=[$4,000,000x7%x(1-30%)]/[($4,000,000/$1,000)x20]=$2.45<br>稀釋每股盈餘=($1,200,000+$196,000)/(400,000+80,000)= $2.91</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q23. 中興公司於X5年初平價發行3,000張可轉換公司債，每張面額$1,000，票面利率8%，每年年底付息一次，發行時不含轉換權之公司債公允價值為$2,883,310，有效利率為9%，轉換價格為$30。若所得稅率為17%，普通股全年平均市價為$25，則中興公司X5年該可轉換公司債之每增額股份盈餘為何？  [108地特中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.66</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $1.79</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $1.99</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.15</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>每增額股份盈餘=($2,883,310x9%x0.83)/(3,000x$1,000/$25)=$1.79</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q24. 綠水公司X5年度之淨利為$1,951,600。其他相關資料如下：1月１日普通股流通在外股數400,000股；4月1日按市價現金增資140,000股；7月1日配發40%之股票股利；10月1日買回庫藏股40,000股。若該公司無潛在普通股存在，則X5年度之每股盈餘為何？  [108地特中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $2.76</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $2.80</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $2.81</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $3.63</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=400,000x1.4x12/12+140,000x1.4x9/12-40,000x3/12=697,000<br>每股盈餘=$1,951,600/697,000=$2.80</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q25. 丁公司本年度相關資料如下：<br>本期稅後淨利$100,000，全年普通股流通在外股數25,000股。所得稅率20%。<br>本年1/1丁公司以面額發行4%可轉換特別股20,000股，每股面額$50，每股特別股可轉換成2股普通股，全年無實際轉換。<br>本年7/1另發行面額$500,000，票面利率5%之可轉換公司債，轉換價格每股股票以$40。轉換公司債以$530,000發行，其中負債部分$500,000，權益部分為$30,000。該公司全年無轉換。<br>請問丁公司稀釋每股盈餘為多少？  [108薦任升等]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. $1.538</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $1.544</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $2.24</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.40</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>可轉換特別股之每增額股份盈餘=$50x20,000x4%/(20,000x2)=$40,000/40,000=$1<br>可轉換公司債之每增額股份盈餘=[$500,000x5%x(6/12)x(1-20%)]/[($500,000/$40)x(6/12)]<br>=$10,000/6,250=$1.6(反稀釋)<br>稀釋每股盈餘=($60,000+$40,000)/(25,000+40,000)=$100,000/65,000=$1.538</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q26. X7年1月1日甲公司發行面額$10，6%之可轉換累積特別股20,000股，每股特別股可轉換成2股普通股，X7年公司未宣告發放現金股利。X8年4月1日公司發行100張面額$10,000之可轉換公司債，票面利率8%，每年底付息一次，每張債券可轉換成1,000股普通股。可轉換公司債發行時負債組成部分為$1,000,000，有效利率亦為8%，權益組成部分為$80,000，至X8年底該公司債並無轉換。X8年6月30日公司宣告並發放特別股股利，X8年10月1日面額$100,000之可轉換特別股轉換為普通股。X8年初甲公司有普通股300,000股流通在外，X8年度稅後淨利為$500,000，所得稅率20%，則X8年度稀釋每股盈餘是多少？  [108薦任升等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.28</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $1.32</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $1.47</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $1.60</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=300,000x9/12+320,000x3/12=305,000<br>基本每股盈餘=[$500,000-(20,000x$10x6%)]/305,000=$1.6<br>累積特別股：<br>已轉換=(10,000x$10x6%x9/12)/(10,000x2x9/12)=$4,500/15,000<br>未轉換=(10,000x$10x6%)/(10,000x2)=$6,000/20,000<br>每增額股份盈餘=($4,500+$6,000)/(15,000+20,000)=$10,500/35,000=$0.3<br>可轉換公司債：<br>每增額股份盈餘=($1,000,000x8%x9/12x80%)/(100x1,000x9/12)<br>=$48,000/75,000=$0.64<br>稀釋每股盈餘=($500,000-$12,000+$10,500+$48,000)/(305,000+35,000+75,000)=$1.32</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q27. 甲公司X8年初流通在外特別股包括：(1)利率6%，可賣回累積特別股500,000股，面額$10，發行時每股溢價$15；(2)股利率8%，不可賣回非累積特別股500,000股，面額$10，發行時每股溢價$18。該公司於X8年3月1日以每股$25自公開市場買回50,000股不可賣回非累積特別股。若甲公司X8年度淨利為$5,000,000，稅率為20%，當年度未宣告發放股利，全年流通在外普通股為2,500,000股，則X8年度基本每股盈餘為何？  [109高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.82</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $1.88</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $1.94</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. $2.06</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X8年基本每股盈餘=[$5,000,000+($10+$18-$25)x50,000]/2,500,000=$2.06</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q28. 甲公司2019年的本期淨利為$500,000，在2019年1月1日流通在外的普通股為200,000股，4月1日發行20,000股，9月1日甲公司買回30,000股庫藏股。稅率為40%。2019年間，甲公司共有40,000股流通在外的可轉換特別股，特別股面值為$100，每年支付$3.50的股息，並且每一股特別股可轉換為三股普通股。甲公司在2018年間發行面值$2,000,000(且其負債組成部分亦為$2,000,000)的10%可轉換公司債，每張$1,000的公司債可轉換為30股普通股。請問2019年稀釋每股盈餘為何？  [109鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.11</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $1.54</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $1.61</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $1.76</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=200,000+20,000x9/12-30,000x4/12=205,000<br>基本每股盈餘=($500,000-$3.50x40,000)/205,000=$1.76<br>每增額股份盈餘：<br>可轉換特別股=$3.50x40,000/40,000x3=$140,000/120,000=$1.17<br>可轉換公司債=($2,000,000x10%x60%)/($2,000,000/$1000x30)=$120,000/60,000=$2.0(反稀釋)<br>稀釋每股盈餘=($500,000-$140,000+$140,000)/(205,000+120,000)=1.54</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q29. 於計算每股盈餘時，若去年約定之或有發行股份之所有條件恰好於今年期末均已全部達成，則下列敘述何者正確？(1)計算當年度基本每股盈餘時，或有發行應增加之普通股數為零(2)計算當年度稀釋每股盈餘時，或有發行應增加之普通股數視為期初已發行  [109會計師]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 僅(1)正確</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 僅(2)正確</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. (1)(2)均正確</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. (1)(2)均不正確</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q30. 東南公司X1年及X2年度相關資料如下：(1)X1年底購入皇家公司，條件之一為若皇家公司X2年度的淨利在$120,000以上，則東南公司將在X3年另增發3,000股之普通股予原皇家公司的股東。皇家公司X2年度之淨利為$125,000。(2)X2年初平價發行1,000張可轉換公司債，每張面額$1,000，票面利率3%，每年底付息一次。發行價格中屬於負債組成部分為$872,530，有效利率為6%，公司債持有人可以選擇以普通股或現金清償該可轉換公司債之本金，轉換價格為$25。(3)X2年初按面值發行4%可轉換特別股10,000股，每股面值$100，每股可轉換成普通股5股。若東南公司適用之所得稅率為17%，普通股全年平均市價為$20，X2年度淨利為$600,000，流通在外普通股股數為200,000股。試計算東南公司X2年稀釋每股盈餘：  [109地特中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. $2.12</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $2.37</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $2.76</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.24</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=($600,000-$40,000)/200,000=$2.8<br>每增額股份盈餘：<br>(1)$0/3,000=$0<br>(2)[$872,530x6%x(1-17%)]/($1,000x1,000/$20)=$43,452/50,000=$0.87<br>(3)($100x10,000x4%)/(5x10,000)=$40,000/50,000=$0.8<br>稀釋每股盈餘=[($600,000-$40,000)+$0+$40,000+$43,452]/(200,000+3,000+50,000+50,000)=$2.12</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q31. 丁公司X2全年度普通股流通在外股數200,000股，數年前發行5,000股之非累積非參加的可轉換特別股，每股面額$50，股利率5%，轉換條件為每股特別股可轉換為普通股2股。其後，可轉換特別股2,000股，在X2年10月1日轉換為普通股。丁公司Ｘ2年度淨利為$600,000，3月份已宣告並分配現金股利$50,000，稅率為20%。試問：丁公司X2年度之稀釋每股盈餘為何？(註：每股盈餘請四捨五入以小數點後兩位表達，例如：x.xx)  [110高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $2.80</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $2.86</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $2.92</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.99</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=200,000x12/12+2000x2x3/12=201,000<br>基本每股盈餘=($600,000-$50x5,000x5%)/201,000=$2.92<br>每增額股份盈餘=($50x3,000x5%+$50x2,000x5%)/(3,000x2+2,000x2x9/12)=$12,500/9,000=$1.39<br>稀釋每股盈餘=($600,000-$12,500+$12,500)/(201,000+9,000)=$2.86</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q32. 丁公司X3年1月1日普通股流通在外股數為250,000股，及6%可轉換累積特別股流通在外3,000股，每股面額$30，每股可轉換為普通股3股。此外，4月1日發行普通股5,000股，10月1日2,000股特別股轉換為普通股。丁公司X3年度之淨利為$300,000。試問：基本每股盈餘與稀釋每股盈餘之加權平均流通在外之普通股股數分別為何？  [110鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 255,250股及262,750股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 256,500股及261,000股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 257,000股及262,750股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 261,000股及264,000股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘加權平均流通在外股數<br>=250,000x3/12+(250,000+5,000)x6/12+(250,000+5,000+2,000x3)x3/12=255,250<br>基本每股盈餘加權平均流通在外股數=255,250+2,000x3x9/12+1,000x3x12/12=262,750</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q33. 三星公司2020年度之淨利為$821,000，其他相關資料如下：(1)2020年全年有20,000股，每股面額$100，4%之累積特別股流通在外。(2)2020年1月1日流通在外普通股100,000股，4月1日現金發行20,000股，7月1日發放10%股票股利，10月1日買回庫藏股12,000股，12月1日進行1股分為2股之股份分割。試計算2020年每股盈餘：  [110地特中會]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. $3</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $3.25</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $6</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $6.25</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=[(100,000x12/12+20,000x9/12)x110%-12,000x3/12]x2=247,000<br>每股盈餘=($821,000-$100x20,000x4%)/$247,000=$3</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q34. 甲公司於X0年年底併購乙公司。併購時之契約明訂，兩公司於合併後兩個會計年度的稅後淨利皆高於$500,000時，會於X3年額外發行60,000股給予原乙公司之股東。併購後甲公司之X1年的本期淨利為$540,000，年度在外流通股數之加權平均為240,000股。試問甲公司X1年之稀釋每股盈餘之金額為何？  [110薦任升等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $2.25</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $2.08</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $1.80</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $1.67</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>稀釋每股盈餘=$540,000/(240,000+60,000)=$1.80</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q35. 甲公司X2年初流通在外普通股股數為200,000股，X2年初有認股權30,000單位流通在外，每單位得按$40認購普通股1股，5月1日已認購18,000股，其餘12,000單位至X2年底仍未執行。此外，X2年初公司有面額$1,000,000，票面利率4%之可轉換公司債，其中負債組成部分之原始有效利率亦為4%，每$100,000面額可轉換成普通股10,000股，X2年9月1日有$600,000可轉換公司債轉換成普通股60,000股，其餘債券至年底仍流通在外。甲公司普通股X2年1月1日至4月30日平均股價為$50，全年平均股價為$60。已知X2年稅後淨利為$793,000，所得稅率為20%，假設該可轉換公司債轉換為普通股對每股盈餘具稀釋效果，則計算稀釋每股盈餘時分母應是多少？  [111高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 307,600股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 316,667股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. 317,200股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 318,000股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘分母=200,000x12/12+18,000x8/12+60,000x4/12=232,000<br>每增額股份盈餘：<br>認股權分母=12,000x(60-40)/60x12/12+18,000x(50-40)/50x4/12=5,200<br>可轉換公司債分母=40,000x12/12+60,000x8/12=80,000<br>稀釋每股盈餘分母=232,000+5,200+80,000=317,200</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q36. 甲公司X2年1月1日流通在外普通股為200,000股，X2年4月1日發行10,000張認股證，每張認股證可按$24認購面額$10之普通股1股，10月1日有6,000張認股證行使權利，其餘4,000單位至X2年底仍未執行。甲公司普通股X2年4月1日至9月30日平均股價為$30，4月1日至年底平均股價$32，X2年淨利為$600,000，所得稅率為20%，則計算稀釋每股盈餘時，分母應是多少？  [111鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 201,500股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 202,250股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 203,150股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 202,850股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘分母=200,000+6,000x3/12=201,500<br>已轉換認股證分母增加=6,000x($30-$24)/30x6/12=600<br>未轉換認股證分母增加=4,000x($32-$24)/32x9/12=750<br>稀釋每股盈餘分母=201,500+600+750=202,850</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q37. 甲公司X1年1月1日有100,000股普通股(面額$10)與20,000股累積特別股(6%，面額$100)流通在外。甲公司X1年4月1日現金增資發行4,000股普通股，X1年7月1日將普通股進行1：2股票分割。X1年度甲公司淨利為$2,278,880，試問甲公司X1年度之每股盈餘為：  [114退除役特考]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $10.38</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $10.48</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $10.95</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $11.06</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=100,000x2+4,000x2x9/12=206,000<br>每股盈餘=(2,278,880-20,000x100x6%)/206,000=10.48</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q38. 甲公司於X3年的稅後淨利為$39,600，加權平均流通在外之普通股數為6,000股，所得稅率為40%。其他相關財務資料如下：(1)X3年1月1日發行認股權，共可認購9,000股普通股，執行價為$90，全年流通在外，且普通股全年平均股價為$150；(2)X3年1月1日以面額發行9%之可轉換累積特別股8,000股，面額$10，1股特別股可轉換為1股普通股。該特別股全年流通在外且無轉換；(3)X3年5月1日發行面額$600,000，票面利率6%的可轉換公司債，轉換價格為每股$100。公司債以$660,000發行，其中負債組成部分為$600,000(即公司債之有效利率為6%)，權益組成部分為$60,000。該公司債全年流通在外且無轉換。請問甲公司於X3年的稀釋每股盈餘為何？  [111地特中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $5.40</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $2.25</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $3.375</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.50</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=($39,600-$10x8,000x9%)/6,000=$5.4<br>每增額股份盈餘：<br>認股權分母增加=9,000x($150-$90)/$150=3,600<br>可轉換累積特別股=($10x8,000x9%)/8,000=$0.9<br>可轉換公司債=$600,000x6%x(1-40%)/6,000=$3.6(反稀釋)<br>稀釋每股盈餘=($32,400+$7,200)/(6,000+3,600+8,000)=$2.25</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q39. 甲公司X1年1月1日流通在外普通股1,000,000股，每股面額$10，3月1日發放股票股利10%，4月1日現金增資500,000股，每股認購價格為$24.4，3月31日市價為每股$28。8月1日股票分割，每股分割成二股，10月1日購入庫藏股票400,000股，至12月31日尚未出售，亦未註銷。若X1年12月31日流通在外股數為2,800,000股，則甲公司X1年計算基本每股盈餘之普通股加權平均流通在外股數為何？  [112高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 2,053,189股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 2,838,315股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 2,850,000股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 2,873,045股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>理論上每股除權後公允價值=(1,000,000x1.1x$28+500,000x$24.4)/1,600,000=$26.875<br>紅利因子=$28/$26.875=1.0419<br>加權平均流通在外股數<br>=(1,000,000x1.1x2x1.0419x2/12)+(1,100,000x2x1.0419x1/12)+(1,600,000x2x4/12)+(3,200,000x2/12)+(2,800,000x3/12)=2,873,045</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q40. 有關每股盈餘之敘述，下列何者正確？  [112高考會審]</div>
+    <div class="options">
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">A. 無論公司的資本結構是簡單資本結構或是複雜資本結構，公司皆應計算及表達稀釋每股盈餘</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 當認股證為價內時，其每增額股份盈餘一定小於基本每股盈餘，故其一定具有稀釋作用</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 在計算稀釋作用時，要將每增額股份盈餘由大排到小，每增額股份盈餘越大代表稀釋作用越大，故應將每增額股份盈餘由大至小依序計入計算稀釋每股盈餘</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 潛在普通股若在年度中執行或轉換成普通股，則已計入基本每股盈餘，故計算稀釋每股盈餘不用再作任何調整</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>無提供解析資訊。</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q41. 甲公司X1年1月1日流通在外股數為300,000股，X1年2月1日發行新股60,000股，8月1日買回庫藏股24,000股，X1年10月10日進行1股分為3股之股份分割。另該公司於X1年7月1日溢價發行10年期、面額$4,000,000、票面利率7%之可轉換公司債，發行價格中屬負債組成要素為$4,294,400(市場利率6%)，每張面額$1,000之公司債可轉換為轉換日當時之普通股30股，公司債溢價採有效利率法攤銷。X8年度稅後淨利為$2,277,000，稅率為20%，X8年度甲公司稀釋每股盈餘為多少？  [112鐵路特考中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 2.167</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 2.2</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 2.158</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. 2.174</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>加權平均流通在外股數=(300,000+60,000x11/12-24,000x5/12)x3=1,035,000<br>基本每股盈餘=$2,277,000/1,035,000=$2.2<br>每增額股份盈餘<br>=[$4,294,400x6%x(1-20%)x6/12]/[$4,000,000/$1,000x30x6/12]=$103,066/60,000=$1.718<br>稀釋每股盈餘=($2,277,000+$103,066)/(1,035,000+60,000)=$2.174</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q42. 甲公司X3年度淨利$750,000，普通股全年流通在外股數為200,000股。X3年初有流通在外認股權15,000單位，每單位得按每股$40認購普通股1股，截至年底尚未執行。此外，X3年1月1日公司發行員工股票選擇權10,000股，員工於服務滿4年後，每單位得按每股$30認購普通股1股，發行日每單位員工股票選擇權之公允價值為$15，X3年12月31日員工尚須提供服務之每股公允價值為$12。甲公司普通股全年平均市價為$48。試問甲公司X3年稀釋每股盈餘為何？  [112地特中會]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $3.64</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $3.68</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $3.69</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $3.70</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=$750,000/200,000=$3.75<br>每增額股份盈餘：<br>認股權分母增加數=15,000x($48-$40)/$48=2,500<br>員工股票選擇權分母增加數=10,000x[$48-($30+$12)]/$48=1,250<br>稀釋每股盈餘=$750,000/(200,000+2,500+1,250)=$3.68</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q43. 彰化公司X1年度的普通股全年流通在外股數為2,000,000股，每股面值$10，全年平均市價為$20，本期淨利為$4,500,000。該公司另有3%不可轉換的累積特別股(已積欠2年股利)1,000,000股，每股面值$10，全年流通在外。彰化公司曾於之前年度給予員工認股權600,000股，可按每股$15的價格認購普通股，X1年未有人行使。試問彰化公司X1年度的稀釋每股盈餘為何？  [112薦任升等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.67</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $1.80</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $1.95</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $2.10</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>X1年度基本每股盈餘=($4,500,000-$10x1,000,000x3%)/2,000,000=$2.10<br>認股權增加股數=600,000x($20-$15)/$20=150,000<br>X1年度稀釋每股盈餘=($4,500,000-$10x1,000,000x3%)/(2,000,000+150,000)=$1.95</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q44. 甲公司X6年1月1日流通在外普通股股數為100,000股，7月1日發行新股60,000股，10月1日發行5%，面額$100，可轉換公司債400張，每張可轉換成15股普通股，該公司債具稀釋作用，則甲公司在計算X6年稀釋每股盈餘時，其加權平均流通在外普通股股數為：  [113地特三等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 161,500股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. 160,000股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. 131,500股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 130,000股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>100,000x6/12+(100,000+60,000)x6/12+(400x15)x3/12=131,500</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q45. X4年初甲公司有面額$10、4%之不可轉換特別股50,000股及面額$10之100,000股普通股發行流通在外，X4年1月1日甲公司給與員工股票選擇權30,000股，員工於服務滿3年後，每單位可按每股$30認購普通股一股，給與日每單位員工股票選擇權之公允價值為$18。X5年7月1日甲公司另發行認股證，股東可按每股$45認購普通股60,000股，至X5年底尚未執行。甲公司X5年淨利為$740,000，普通股X5年全年平均市價為$48，7月1日至12月31日之平均市價為$54，則X5年稀釋每股盈餘是多少？  [113高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $4.65</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $6.13</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $6.19</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">D. $6.40</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=(740,000-10x50,000x4%)/100,000=7.2<br>每增額股份盈餘<br>股份基礎給付：<br>分子=0，分母=30,000-((30+18x1/3)x30,000)/48=7,500<br>認股權：<br>分子=0，分母=(60,000-(45x60,000)/54)x6/12=5,000<br>稀釋每股盈餘=(740,000-10x50,000x4%)/(100,000+7,500+5,000)=6.4</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q46. 甲公司X2年度淨利為$700,000，稅率為20%。全年有普通股200,000股流通在外。若該公司於X2年初有10%可轉換公司債，面額為$100，流通在外20,000張，每張可換成普通股2股，發行價格中的負債組成要素相當於面額。此外，該公司X1年初發行賣權6,000個，每個得依$20之價格賣回1股面額為$10的普通股給公司，普通股全年平均市價為$12。下列何者為用於計算X2年度稀釋每股盈餘的股數？  [114地特三等]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 200,000股</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. 204,000股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. 220,000股</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 244,000股</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=$700,000/200,000=$3.5<br>10%可轉換公司債：<br>每增額股份盈餘=($2,000,000x10%x(1-20%))/(20,000x2)=4>3.5<br>賣權增額股數=(20-12)/12x6,000=4,000<br>稀釋每股盈餘的股數=200,000+4,000=204,000</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q47. 甲公司於20X1年1月1日發行不可轉換，不可賣回，每股面值$10的累積特別股2,000股，自20X3年起，特別股股東獲得股利率5%，此等股利率等同於其他相同等級特別股於20X1年1月1日發行的市場股利率。試問：甲公司計算20X2年度的基本每股盈餘，視為特別股股利之金額為何？  [114高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $0</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $907.03</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $952.38</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $1,000</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>2,000x$10x5%xp(1,5%)=952.38</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q48. 甲公司與乙公司於X1年初完成合併，其中或有股份條件指出，被併購乙公司在X1至X2年度中，若任一年度乙公司淨利超過$110,000，則甲公司將在X3年初額外給予乙公司的股東10,000股之甲公司股票。X1年12月31日甲公司之合併淨利為$750,000，不考量或有股份條件之全年加權平均流通在外股數為200,000股。假設乙公司X1年度淨利為$125,000，則甲公司X1年的基本與稀釋每股盈餘分別為：  [114會計師]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. 兩者皆為$3.75</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $3.66與$3.57</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $3.75與$3.57</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. 兩者皆為$3.57</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=750,000/200,000=3.75<br>稀釋每股盈餘=750,000/(200,000+10,000)=3.57</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q49. 甲公司X5年度稅前淨利$250,000，稅率為25%，全年加權平均流通在外普通股為120,000股，且有下列三種證券全年流通在外：(1)認股權證30,000張，每張可以$40認購普通股1股，甲公司普通股每股全年平均市價為$50。(2)可轉換公司債面額$2,000,000，票面利率6%，其中負債組成部分為$2,000,000(即公司債有效利率亦為6%)，可轉換成65,000股普通股。(3)可轉換累積特別股30,000股，股利率9%，每股面額$20，可轉換成30,000股普通股，截至X4年底止已積欠2年股利，X5年甲公司董事會已宣告發放3年股利。甲公司X5年度稀釋每股盈餘為何？  [114退除役特考]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $1.50</button>
+      <button class="option-btn"  onclick="selectSingle(this)">B. $1.49</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">C. $1.45</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $1.38</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>基本每股盈餘=(250,000x0.75)/120,000=1.5625<br>一、認股權證<br>分子=0，分母=30,000-(30,000x40)/50=6,000<br>二、可轉債<br>分子=2,000,000x0.06x(1-25%)=90,000，分母=65,000<br>每增額股份盈餘=90,000/65,000=1.38<br>三、可轉換特別股<br>分子=30,000x0.09x20=54,000，分母=30,000<br>每增額股份盈餘=54,000/30,000=1.8<br>稀釋每股盈餘=(250,000x0.75+90,000)/(120,000+6,000+65,000)=1.45</div>
+  </div>
+  <div class="card">
+    <span class="badge ">單選題</span>
+    <div class="question">Q50. 甲公司X5年初有20,000股面額為$10之普通股及10,000股面額為$10，4%之不可轉換累積特別股流通在外，X5年1月1日甲公司給與員工認股權4,000單位，員工於服務滿3年後，每單位可按每股$30認購普通股1股，給與日每單位員工認股權之公允價值為$12。X6年9月1日甲公司另發行認股證，股東可按每股$44認購普通股2,000股，至X6年底均未行使。甲公司X6年淨利為$150,000，普通股全年平均市價為$64，9月1日至12月31日之平均市價為$80，試問X6年稀釋每股盈餘是多少？  [115高考會審]</div>
+    <div class="options">
+      <button class="option-btn"  onclick="selectSingle(this)">A. $6.51</button>
+      <button class="option-btn" data-correct="true" onclick="selectSingle(this)">B. $6.58</button>
+      <button class="option-btn"  onclick="selectSingle(this)">C. $6.66</button>
+      <button class="option-btn"  onclick="selectSingle(this)">D. $6.74</button>
+    </div>
+    <button class="submit-btn" onclick="checkAnswer(this)">確認提交此題</button>
+    <div class="explanation"><strong>💡 解析：</strong><br>特別股股利=10,000股x10x4%=4,000<br>基本每股盈餘=(150,000-4,000)/20,000=7.3<br>每增額股份盈餘：<br>股份基礎給付，執行價格=30+12x1/3=34<br>分子=0，分母=4,000x(64-34)/64=1,875<br>認股證：<br>分子=0，分母=2,000x(80-44)/80x4/12=300<br>稀釋每股盈餘=(150,000-4,000)/(20,000+1,875+300)=6.58</div>
+  </div>
+  <button class="close-btn" onclick="closePage()">❌ 關閉本頁</button>
+  <div class="copyright">© 滄海圖書資訊股份有限公司</div>
+</div>
+<script>
+function selectSingle(btn) { const options = btn.parentElement.querySelectorAll('.option-btn'); options.forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); }
+function selectMulti(btn) { btn.classList.toggle('selected'); }
+function checkAnswer(submitBtn) { 
+  const card = submitBtn.closest('.card'); const buttons = card.querySelectorAll('.option-btn'); const exp = card.querySelector('.explanation'); const selectedButtons = card.querySelectorAll('.option-btn.selected'); 
+  if (selectedButtons.length === 0) { 
+    submitBtn.innerText = "⚠️ 請先選擇答案再提交喔！"; submitBtn.style.background = "#ff4d4f";
+    setTimeout(() => { submitBtn.innerText = "確認提交此題"; submitBtn.style.background = "#2383e2"; }, 2000); return; 
+  } 
+  buttons.forEach(b => b.disabled = true); submitBtn.style.display = 'none'; 
+  buttons.forEach(b => { 
+    const isBtnCorrect = b.getAttribute('data-correct') === 'true'; const isBtnSelected = b.classList.contains('selected'); 
+    if (isBtnCorrect) b.classList.add('correct'); 
+    if (isBtnSelected && !isBtnCorrect) b.classList.add('wrong'); 
+  }); 
+  exp.style.display = 'block'; 
+}
+function closePage() {
+  if (confirm("確認要關閉此測驗視窗嗎？")) {
+    window.close();
+    setTimeout(() => { alert("請直接關閉或切換此瀏覽器分頁。"); }, 300);
+  }
+}
+</script>
+</body>
+</html>
